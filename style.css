@@ -1,0 +1,49 @@
+.marginTop15 {
+    margin-top: 15px;
+}
+
+.yearHeader {
+    margin-top: 50px;
+    height: 35px;
+    background: #F6F6F6;
+    text-align: center;
+    padding: 4px 0;
+    border-bottom: 1px solid #B7B5A9;
+    font-weight: bold;
+    background: #344096;
+    color: #EAEAEA;
+}
+
+.monthsHeader {
+    background: #F6F6F6;
+    font-weight: bold;
+}
+
+.monthCell {
+    padding: 10px 0;
+    text-align: center;
+    background: #344096;
+    color: #EAEAEA;
+}
+
+.monthCell + .monthCell {
+    border-left: 1px solid #B7B5A9;
+}
+
+.taskRow {
+    height: 55px;
+    border-bottom: 1px solid #aaa;
+}
+
+.taskCell {
+    border-radius: 3px;
+    padding: 2px 5px;
+    overflow: hidden;
+    height: 45px;
+    margin-top: 5px;
+    text-align: center;
+}
+
+.taskCell div {
+    overflow: hidden;
+}
