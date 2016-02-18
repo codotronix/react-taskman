@@ -1,14 +1,6 @@
-//var MyComponent = React.createClass({
-//    render: function () {
-//        return (
-//            <div>
-//                Hi, I am a Component... and I'm created by {this.props.createdBy}
-//            </div>
-//        );
-//    }
-//});
-//ReactDOM.render(<MyComponent createdBy="Barick"/>, document.getElementById('container'));
-
+/****************************************************************************************
+***************** Component:  TimeHeader ************************************************
+****************************************************************************************/
 var TimeHeader = React.createClass({
     render: function () {
         var months = [];
@@ -37,7 +29,13 @@ var TimeHeader = React.createClass({
     }
 
 });
+/////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+/****************************************************************************************
+************************ Component:  Task ***********************************************
+****************************************************************************************/
 var Task = React.createClass({
     getCellClass: function () {
         var duration = this.props.task.end - this.props.task.start;
@@ -54,7 +52,13 @@ var Task = React.createClass({
         );
     }
 });
+/////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+/****************************************************************************************
+***************** Component:  TaskContainer *********************************************
+****************************************************************************************/
 var TaskContainer = React.createClass({
     getInitialState: function () {
         return ({taskData: []});
@@ -101,6 +105,9 @@ var TaskContainer = React.createClass({
         );
     }
 });
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
  
 //ReactDOM.render(<TaskInnerContainer taskData={taskData}/>, document.getElementById('taskContainer'));
 ReactDOM.render(
