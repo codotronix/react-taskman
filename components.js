@@ -5,21 +5,23 @@ var TimeHeader = React.createClass({
     render: function () {
         var months = [];
         var monthClass = '';
-        if (this.props.subHeader == 'y') {
+        //console.log('Inside TimeHeader render...');
+        //cosole.log(this.props.timeInfo);
+        if (this.props.timeInfo.viewScope == 'y') {
             months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];      
             monthClass = "col-xs-30 monthCell";
-        } else if (this.props.subHeader == 'q') {
+        } else if (this.props.timeInfo.viewScope == 'q') {
             months = ['Jan', 'Feb', 'Mar'];      
             monthClass = "col-xs-120 monthCell";
-        } else if (this.props.subHeader == 'm') {
+        } else if (this.props.timeInfo.viewScope == 'm') {
             months = ['Jan'];      
             monthClass = "col-xs-360 monthCell";
         }
         
         return (
-            <div className="row">
+            <div className="col-xs-360 timeHeader">
                 <div className="yearHeader">
-                    {this.props.year}
+                    {this.props.timeInfo.year}
                 </div>
                 <div className="monthsHeader">
                     {months.map(function(monthName){
@@ -30,6 +32,8 @@ var TimeHeader = React.createClass({
                         );
                     })}
                 </div>
+                <i className="fa fa-chevron-circle-left left"></i>
+                <i className="fa fa-chevron-circle-right right"></i>
             </div>
         );
     }
@@ -123,7 +127,7 @@ var TaskContainer = React.createClass({
     },
     render: function () {
         return (
-            <div>                
+            <div className="col-xs-360">                
                 {this.state.taskData.map(function(task){
                     return (
                         <Task task={task} key={task.id}/>
@@ -173,31 +177,44 @@ var ToolsGroup = React.createClass({
 
 
 /****************************************************************************************
-* Component:  TaskMan                                                                   *
+* Component: TaskMan                
+*
 * Summary: It is the highest level component.
+
 * State Objects: 1. TimeInfo 
                     {
                         viewScope: "y", //can be y, q, m
                         year: 2016,
-                        quaeter: 1,
+                        quarter: 1,
                         month: 2                        
                     }
+                    
+* Methods: 1. viewChanged -> this function will be send as prop to ToolsGroup, so that
+                            selectView dropdown can use it to change the state var 
+                            timeInfo
 ****************************************************************************************/
 var TaskMan = React.createClass({
     getInitialState: function () {
-        var year = this.props.year;
-        var subHeader = this.props.subHeader;
-        return ({year: year, subHeader:subHeader});
+        var timeInfo = {
+            viewScope: "y",
+            year: 2016,
+            quarter: 1,
+            month: 2
+        };
+        
+        return ({timeInfo: timeInfo});
     },
-    viewChanged: function (subHeader) {
-        console.log('setting the TaskMan state subHeader=' + subHeader);
-        this.setState({subHeader: subHeader});
+    viewChanged: function (viewScope) {
+        var timeInfo = this.state.timeInfo;
+        timeInfo.viewScope = viewScope;
+        console.log('setting the TaskMan state timeInfo='); console.log(timeInfo);
+        this.setState({timeInfo: timeInfo});
     },
     render: function () {
         return (
             <div>
                 <ToolsGroup viewChanged={this.viewChanged}/>
-                <TimeHeader  year={this.state.year} subHeader={this.state.subHeader}/>
+                <TimeHeader timeInfo={this.state.timeInfo}/>
                 <TaskContainer />
             </div>
         );
@@ -218,7 +235,7 @@ var TaskMan = React.createClass({
  
 //ReactDOM.render(<TaskInnerContainer taskData={taskData}/>, document.getElementById('taskContainer'));
 ReactDOM.render(
-    <TaskMan year="2016" subHeader="y"/>, 
+    <TaskMan />, 
     document.getElementById('reactContainer')
 );
 

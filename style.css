@@ -2,12 +2,34 @@
     margin-top: 15px;
 }
 
+.timeHeader {
+    position: relative;
+}
+
+.timeHeader .fa {
+    position: absolute;
+    top: 4px;
+    color: rgba(255,255,255,.6);
+    font-size: 29px;
+}
+
+.timeHeader .fa:hover {
+    color: #EAEAEA;
+}
+
+.timeHeader .left {
+    left: 5px;
+}
+
+.timeHeader .right {
+    right: 5px;
+}
+
 .yearHeader {
-    margin-top: 50px;
     height: 35px;
     background: #F6F6F6;
     text-align: center;
-    padding: 4px 0;
+    padding: 5px 0;
     border-bottom: 1px solid #B7B5A9;
     font-weight: bold;
     background: #344096;
