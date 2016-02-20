@@ -140,8 +140,23 @@ var ToolsGroup = React.createClass({
 
 
 
+
+
+
+
+
+
+
 /****************************************************************************************
-*********************** Component:  TaskMan *********************************************
+* Component:  TaskMan                                                                   *
+* Summary: It is the highest level component.
+* State Objects: 1. TimeInfo 
+                    {
+                        viewScope: "y", //can be y, q, m
+                        year: 2016,
+                        quaeter: 1,
+                        month: 2                        
+                    }
 ****************************************************************************************/
 var TaskMan = React.createClass({
     getInitialState: function () {
@@ -164,6 +179,16 @@ var TaskMan = React.createClass({
     }
 });
 /////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
 
  
 //ReactDOM.render(<TaskInnerContainer taskData={taskData}/>, document.getElementById('taskContainer'));
