@@ -99,26 +99,34 @@ var TaskContainer = React.createClass({
         return ({taskData: []});
     },
     addNewTask: function () {
-        var tasks = this.state.taskData;
+        //var tasks = this.state.taskData;
         
         //Let's create and Add 5 more tasks...
-        for(var i=0; i<5; i++) {        
-            var newId = (new Date()).getTime() * Math.random();
-            var taskName = "Task_" + Math.round(Math.random()*999999);
-            var taskColor = "rgb(" + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ')';
-            var startDate = Math.floor(Math.random()*180);
-            var endDate = Math.floor(Math.random()*180) + 180;
-
-            var newObj = {
-                id: newId,
-                name: taskName,
-                start: startDate,
-                end: endDate,
-                bgColor: taskColor
-            }
-            tasks.push(newObj);
-        }
-        this.setState({taskData: tasks});
+//        for(var i=0; i<5; i++) {        
+//            var newId = (new Date()).getTime() * Math.random();
+//            var taskName = "Task_" + Math.round(Math.random()*999999);
+//            var taskColor = "rgb(" + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ')';
+//            var startDate = Math.floor(Math.random()*180);
+//            var endDate = Math.floor(Math.random()*180) + 180;
+//
+//            var newObj = {
+//                id: newId,
+//                name: taskName,
+//                start: startDate,
+//                end: endDate,
+//                bgColor: taskColor
+//            }
+//            tasks.push(newObj);
+//        }
+//        this.setState({taskData: tasks});
+        var that = this;
+        $.get("/react-taskman/php/getTask.php", function(result){
+            //console.log(JSON.parse(result));
+            var tasks = JSON.parse(result);
+            //console.log(tasks);
+            that.setState({taskData: tasks});
+            //console.log(that.state);
+        }, "json");
         
         setTimeout(function(){
             document.getElementById('btnLoadMoreTasks').scrollIntoView();
@@ -151,6 +159,26 @@ var ToolsGroup = React.createClass({
         //console.log(e.target.value);
         this.props.viewChanged(e.target.value);
     },
+    addNewTask: function () {
+        //let's make a new dummy task
+        var newId = (new Date()).getTime() * Math.random();
+        var taskName = "Task_" + Math.round(Math.random()*999999);
+        var taskColor = "rgb(" + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ')';
+        var startDate = Math.floor(Math.random()*180);
+        var endDate = Math.floor(Math.random()*180) + 180;
+
+        var newObj = {
+            id: newId,
+            name: taskName,
+            start: startDate,
+            end: endDate,
+            bgColor: taskColor
+        }
+        
+        $.post("/react-taskman/php/saveTask.php", {task: newObj}, function(result){
+            console.log(result);
+        });
+    },
     render: function () {        
         return (
             <div className="col-xs-360 marginTop15">
@@ -160,6 +188,9 @@ var ToolsGroup = React.createClass({
                         <option value="q">Quarter</option>
                         <option value="m">Month</option>
                     </select>
+                </div>
+                <div className="col-xs-30">
+                    <button id="addNewTask" onClick={this.addNewTask}>Add New Task</button>
                 </div>
             </div>
         );
