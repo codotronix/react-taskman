@@ -186,9 +186,15 @@ var ToolsGroup = React.createClass({
             console.log(result);
         });
     },
+    showAddNewTaskModal: function () {
+        $('#modal_AddNewTask').modal('show');
+    },
     render: function () {        
         return (
-            <div className="col-xs-360 marginTop15">
+            <div className="col-xs-360 toolsGroup">
+                <div className="col-xs-20">
+                    <i className="fa fa-plus" title="Add New Task" onClick={this.showAddNewTaskModal}></i>
+                </div>
                 <div className="col-xs-30">
                     <select className="form-control" onChange={this.viewStateChanged}>
                         <option value="y">Year</option>
@@ -196,9 +202,7 @@ var ToolsGroup = React.createClass({
                         <option value="m">Month</option>
                     </select>
                 </div>
-                <div className="col-xs-30">
-                    <button id="addNewTask" onClick={this.addNewTask}>Add New Task</button>
-                </div>
+                
             </div>
         );
     }
@@ -240,7 +244,9 @@ var TaskMan = React.createClass({
             month: 2
         };
         
-        return ({timeInfo: timeInfo});
+        var showAddNewTaskModal = false;
+        
+        return ({timeInfo: timeInfo, showAddNewTaskModal: showAddNewTaskModal});
     },
     viewChanged: function (viewScope) {
         var timeInfo = this.state.timeInfo;
@@ -294,12 +300,16 @@ var TaskMan = React.createClass({
         
         this.setState({timeInfo: timeInfo});
     },
+    saveNewTask: function (e) {
+        console.log(e.target);
+    },
     render: function () {
         return (
             <div>
                 <ToolsGroup viewChanged={this.viewChanged} />
-                <TimeHeader timeInfo={this.state.timeInfo} viewPrev={this.viewPrev} viewNext={this.viewNext}/>
+                <TimeHeader timeInfo={this.state.timeInfo} viewPrev={this.viewPrev} viewNext={this.viewNext} />
                 <TaskContainer />
+                <Modal_AddNewTask saveNewTask={this.saveNewTask}/>               
             </div>
         );
     }
@@ -309,7 +319,63 @@ var TaskMan = React.createClass({
 
 
 
-
+var Modal_AddNewTask = React.createClass({
+    render: function () {
+        return (
+            <div className="modal fade" tabIndex="-1" id="modal_AddNewTask">
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 className="modal-title">Add New Task</h4>
+                  </div>
+                  <div className="modal-body">
+                    <div className="col-xs-360 col-md-180">
+                        <section className="clearfix">
+                            <label className="col-xs-90">Name</label>
+                            <div className="col-xs-250 col-xs-offset-20">
+                                <input type="text" className="form-control" id="taskName"/>
+                            </div>
+                        </section>
+                        <section className="clearfix marginTop15">
+                            <label className="col-xs-90">Start Date</label>
+                            <div className="col-xs-250 col-xs-offset-20">
+                                <input type="text" className="form-control" id="taskStartDate"/>
+                            </div>
+                        </section>
+                    </div>
+                    <div className="col-xs-360 col-md-180">
+                        <section className="clearfix">
+                            <label className="col-xs-90 col-xs-offset-20">Owner</label>
+                            <div className="col-xs-250">
+                                <input type="text" className="form-control" id="taskOwner"/>
+                            </div>
+                        </section>
+                        <section className="clearfix marginTop15">
+                            <label className="col-xs-90 col-xs-offset-20">End Date</label>
+                            <div className="col-xs-250">
+                                <input type="text" className="form-control" id="taskEndDate"/>
+                            </div>
+                        </section>
+                    </div>
+                    <div className="col-xs-360 clearfix marginTop15">
+                        <label className="col-xs-56">Description</label>
+                        <div className="col-xs-304">
+                            <textarea className="form-control" id="taskDesc"/>
+                        </div>
+                    </div>
+                    <div className="clearfix"></div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" className="btn btn-primary" onClick={this.props.saveNewTask}>Save changes</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        );
+    }
+});
 
 
 

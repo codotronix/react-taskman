@@ -2,6 +2,24 @@
     margin-top: 15px;
 }
 
+.toolsGroup {
+    margin: 15px 0; 
+}
+
+.toolsGroup .fa-plus {
+    font-size: 22px;
+    border: 1px solid #5B6FF9;
+    color: #5B6FF9;
+    padding: 5.5px 8px;
+    border-radius: 50%;
+    margin: 0 5px;
+}
+
+.toolsGroup .fa-plus:hover {
+    background: #5B6FF9;
+    color: #FFF;
+}
+
 .timeHeader {
     position: relative;
 }
@@ -28,7 +46,6 @@
 .yearHeader {
     font-size: 17px;
     height: 35px;
-    background: #F6F6F6;
     text-align: center;
     padding: 5px 0;
     border-bottom: 1px solid #B7B5A9;
