@@ -2,19 +2,26 @@
 ***************** Component:  TimeHeader ************************************************
 ****************************************************************************************/
 var TimeHeader = React.createClass({
+    c: {
+        allMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        allQuarters: [['Jan', 'Feb', 'Mar'], ['Apr', 'May', 'Jun'], ['Jul', 'Aug', 'Sep'], ['Oct', 'Nov', 'Dec']]
+    },
     render: function () {
+        
         var months = [];
         var monthClass = '';
+        var timeInfo = this.props.timeInfo;
         //console.log('Inside TimeHeader render...');
         //cosole.log(this.props.timeInfo);
-        if (this.props.timeInfo.viewScope == 'y') {
-            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];      
+        if (timeInfo.viewScope == 'y') {
+            months = this.c.allMonths;
             monthClass = "col-xs-30 monthCell";
-        } else if (this.props.timeInfo.viewScope == 'q') {
-            months = ['Jan', 'Feb', 'Mar'];      
+        } else if (timeInfo.viewScope == 'q') {
+            var q = timeInfo.quarter;
+            months = this.c.allQuarters[q-1];      
             monthClass = "col-xs-120 monthCell";
-        } else if (this.props.timeInfo.viewScope == 'm') {
-            months = ['Jan'];      
+        } else if (timeInfo.viewScope == 'm') {
+            months = [this.c.allMonths[timeInfo.month-1]];      
             monthClass = "col-xs-360 monthCell";
         }
         
@@ -26,14 +33,14 @@ var TimeHeader = React.createClass({
                 <div className="monthsHeader">
                     {months.map(function(monthName){
                         return (
-                            <div className={monthClass}>
+                            <div className={monthClass} key={monthName}>
                                 {monthName}
                             </div>
                         );
                     })}
                 </div>
-                <i className="fa fa-chevron-circle-left left"></i>
-                <i className="fa fa-chevron-circle-right right"></i>
+                <i className="fa fa-chevron-circle-left left" onClick={this.props.viewPrev}></i>
+                <i className="fa fa-chevron-circle-right right" onClick={this.props.viewNext}></i>
             </div>
         );
     }
@@ -241,11 +248,57 @@ var TaskMan = React.createClass({
         console.log('setting the TaskMan state timeInfo='); console.log(timeInfo);
         this.setState({timeInfo: timeInfo});
     },
+    viewPrev: function () {
+        var timeInfo = this.state.timeInfo;
+        
+        if (timeInfo.viewScope == 'y') {
+            timeInfo.year--;
+        } else if (timeInfo.viewScope == 'q') {
+            if (timeInfo.quarter == 1) {
+                timeInfo.year--;
+                timeInfo.quarter = 4;
+            } else {
+                timeInfo.quarter--;
+            }
+        } else if (timeInfo.viewScope == 'm') {
+            if (timeInfo.month == 1) {
+                timeInfo.year--;
+                timeInfo.month = 12;
+            } else {
+                timeInfo.month--;
+            }
+        }
+        
+        this.setState({timeInfo: timeInfo});
+    },
+    viewNext: function () {
+        var timeInfo = this.state.timeInfo;
+        
+        if (timeInfo.viewScope == 'y') {
+            timeInfo.year++;
+        } else if (timeInfo.viewScope == 'q') {
+            if (timeInfo.quarter == 4) {
+                timeInfo.year++;
+                timeInfo.quarter = 1;
+            } else {
+                timeInfo.quarter++;
+            }
+        } else if (timeInfo.viewScope == 'm') {
+            if (timeInfo.month == 12) {
+                timeInfo.year++;
+                timeInfo.month = 1;
+            } else {
+                timeInfo.month++;
+            }
+        }
+        
+        this.setState({timeInfo: timeInfo});
+    },
     render: function () {
         return (
             <div>
-                <ToolsGroup viewChanged={this.viewChanged}/>
-                <TimeHeader timeInfo={this.state.timeInfo}/>
+                <ToolsGroup viewChanged={this.viewChanged} />
+                <TimeHeader timeInfo={this.state.timeInfo} viewPrev={this.viewPrev} viewNext={this.viewNext}/>
                 <TaskContainer />
             </div>
         );
