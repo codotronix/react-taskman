@@ -76,7 +76,7 @@ var Task = React.createClass({
         return (
             <div className="row taskRow">
                 <div className={this.getCellClass()} style={{background: this.props.task.bgColor}}>
-                    {this.props.task.taskName}
+                    {this.props.task.name}
                 </div>                
             </div>
         );
@@ -106,17 +106,14 @@ var TaskContainer = React.createClass({
         var that = this;        
         this.props.myDB.on('child_added', function(snapshot) {            
             var task = snapshot.val();
-            //task.id = task.id ? task.id : (new Date()).getTime() * Math.random();
-            //task.color = task.color ? task.color : that.getRandomColor(); 
-            
             var tasks = that.state.taskData;
             tasks.push(task);
-            
             that.setState({taskData: tasks});
         });
         return ({taskData: []});
     },    
     render: function () {
+        var that = this;
         return (
             <div className="col-xs-360">                
                 {this.state.taskData.map(function(task){
@@ -263,11 +260,11 @@ var TaskMan = React.createClass({
         $('#modal_AddNewTask .field').each(function(){
             var val = $(this).val().trim();
             if (val.length <= 0) {
-                console.log($(this).attr('id') + ' is empty... fill it...');
+                console.log($(this).attr('data-id') + ' is empty... fill it...');
                 taskCreationSuccessful = false;
                 return;
             } else {
-                newTask[$(this).attr('id')] = val;
+                newTask[$(this).attr('data-id')] = val;
             }
         });
         
@@ -284,7 +281,7 @@ var TaskMan = React.createClass({
             <div>
                 <ToolsGroup viewChanged={this.viewChanged} />
                 <TimeHeader timeInfo={this.state.timeInfo} viewPrev={this.viewPrev} viewNext={this.viewNext} />
-                <TaskContainer myDB={this.state.myDB}/>
+                <TaskContainer myDB={this.state.myDB} timeInfo={this.state.timeInfo}/>
                 <Modal_AddNewTask saveNewTask={this.saveNewTask}/>               
             </div>
         );
@@ -301,6 +298,7 @@ var Modal_AddNewTask = React.createClass({
     },
     componentDidMount: function () {
         $('.datepicker').datepicker({
+            format: "yyyy/mm/dd",
             autoclose: true
         });
     },
@@ -323,13 +321,13 @@ var Modal_AddNewTask = React.createClass({
                         <section className="clearfix">
                             <label className="col-xs-90">Name</label>
                             <div className="col-xs-250 col-xs-offset-20">
-                                <input type="text" className="form-control field" id="taskName" placeholder="Enter a name for this task..."/>
+                                <input type="text" className="form-control field" data-id="name" placeholder="Enter a name for this task..."/>
                             </div>
                         </section>
                         <section className="clearfix marginTop15">
                             <label className="col-xs-90">Start Date</label>
                             <div className="col-xs-250 col-xs-offset-20">
-                                <input type="text" className="form-control field datepicker" id="taskStartDate"/>
+                                <input type="text" className="form-control field datepicker" data-id="startDate"/>
                             </div>
                         </section>
                     </div>
@@ -337,20 +335,20 @@ var Modal_AddNewTask = React.createClass({
                         <section className="clearfix">
                             <label className="col-xs-90 col-xs-offset-20">Owner</label>
                             <div className="col-xs-250">
-                                <input type="text" className="form-control field" id="taskOwner"/>
+                                <input type="text" className="form-control field" data-id="owner"/>
                             </div>
                         </section>
                         <section className="clearfix marginTop15">
                             <label className="col-xs-90 col-xs-offset-20">End Date</label>
                             <div className="col-xs-250">
-                                <input type="text" className="form-control field datepicker" id="taskEndDate"/>
+                                <input type="text" className="form-control field datepicker" data-id="endDate"/>
                             </div>
                         </section>
                     </div>
                     <div className="col-xs-360 clearfix marginTop15">
                         <label className="col-xs-56">Description</label>
                         <div className="col-xs-304">
-                            <textarea className="form-control field" id="taskDesc"/>
+                            <textarea className="form-control field" data-id="desc"/>
                         </div>
                     </div>
             
