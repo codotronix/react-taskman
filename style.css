@@ -2,6 +2,10 @@
     margin-top: 15px;
 }
 
+.datepicker {
+    z-index: 9999;
+}
+
 .toolsGroup {
     margin: 15px 0; 
 }
@@ -86,4 +90,8 @@
 
 .taskCell div {
     overflow: hidden;
+}
+
+#bgColor {
+    cursor: pointer;
 }

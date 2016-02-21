@@ -76,7 +76,7 @@ var Task = React.createClass({
         return (
             <div className="row taskRow">
                 <div className={this.getCellClass()} style={{background: this.props.task.bgColor}}>
-                    {this.props.task.name}
+                    {this.props.task.taskName}
                 </div>                
             </div>
         );
@@ -103,43 +103,19 @@ var Task = React.createClass({
 ****************************************************************************************/
 var TaskContainer = React.createClass({
     getInitialState: function () {
-        return ({taskData: []});
-    },
-    addNewTask: function () {
-        //var tasks = this.state.taskData;
-        
-        //Let's create and Add 5 more tasks...
-//        for(var i=0; i<5; i++) {        
-//            var newId = (new Date()).getTime() * Math.random();
-//            var taskName = "Task_" + Math.round(Math.random()*999999);
-//            var taskColor = "rgb(" + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ')';
-//            var startDate = Math.floor(Math.random()*180);
-//            var endDate = Math.floor(Math.random()*180) + 180;
-//
-//            var newObj = {
-//                id: newId,
-//                name: taskName,
-//                start: startDate,
-//                end: endDate,
-//                bgColor: taskColor
-//            }
-//            tasks.push(newObj);
-//        }
-//        this.setState({taskData: tasks});
-        var that = this;
-        $.get("/react-taskman/php/getTask.php", function(result){
-            //console.log(JSON.parse(result));
-            var tasks = JSON.parse(result);
-            //console.log(tasks);
+        var that = this;        
+        this.props.myDB.on('child_added', function(snapshot) {            
+            var task = snapshot.val();
+            //task.id = task.id ? task.id : (new Date()).getTime() * Math.random();
+            //task.color = task.color ? task.color : that.getRandomColor(); 
+            
+            var tasks = that.state.taskData;
+            tasks.push(task);
+            
             that.setState({taskData: tasks});
-            //console.log(that.state);
-        }, "json");
-        
-        setTimeout(function(){
-            document.getElementById('btnLoadMoreTasks').scrollIntoView();
-        }, 100);
-        
-    },
+        });
+        return ({taskData: []});
+    },    
     render: function () {
         return (
             <div className="col-xs-360">                
@@ -165,27 +141,7 @@ var ToolsGroup = React.createClass({
     viewStateChanged: function (e) {
         //console.log(e.target.value);
         this.props.viewChanged(e.target.value);
-    },
-    addNewTask: function () {
-        //let's make a new dummy task
-        var newId = (new Date()).getTime() * Math.random();
-        var taskName = "Task_" + Math.round(Math.random()*999999);
-        var taskColor = "rgb(" + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ')';
-        var startDate = Math.floor(Math.random()*180);
-        var endDate = Math.floor(Math.random()*180) + 180;
-
-        var newObj = {
-            id: newId,
-            name: taskName,
-            start: startDate,
-            end: endDate,
-            bgColor: taskColor
-        }
-        
-        $.post("/react-taskman/php/saveTask.php", {task: newObj}, function(result){
-            console.log(result);
-        });
-    },
+    },    
     showAddNewTaskModal: function () {
         $('#modal_AddNewTask').modal('show');
     },
@@ -244,9 +200,9 @@ var TaskMan = React.createClass({
             month: 2
         };
         
-        var showAddNewTaskModal = false;
+        var myDB = new Firebase('https://codotronix-taskman.firebaseio.com/reactTasks/');
         
-        return ({timeInfo: timeInfo, showAddNewTaskModal: showAddNewTaskModal});
+        return ({timeInfo: timeInfo, myDB: myDB});
     },
     viewChanged: function (viewScope) {
         var timeInfo = this.state.timeInfo;
@@ -301,14 +257,34 @@ var TaskMan = React.createClass({
         this.setState({timeInfo: timeInfo});
     },
     saveNewTask: function (e) {
-        console.log(e.target);
+        //console.log(e.target);
+        var newTask = {};
+        var taskCreationSuccessful = true;
+        $('#modal_AddNewTask .field').each(function(){
+            var val = $(this).val().trim();
+            if (val.length <= 0) {
+                console.log($(this).attr('id') + ' is empty... fill it...');
+                taskCreationSuccessful = false;
+                return;
+            } else {
+                newTask[$(this).attr('id')] = val;
+            }
+        });
+        
+        if (taskCreationSuccessful) {
+            newTask.bgColor = $('#bgColor').css('background-color');
+            newTask.id = (new Date()).getTime() * Math.random();
+            this.state.myDB.push(newTask);
+        }
+        
+        $('#modal_AddNewTask').modal('hide');
     },
     render: function () {
         return (
             <div>
                 <ToolsGroup viewChanged={this.viewChanged} />
                 <TimeHeader timeInfo={this.state.timeInfo} viewPrev={this.viewPrev} viewNext={this.viewNext} />
-                <TaskContainer />
+                <TaskContainer myDB={this.state.myDB}/>
                 <Modal_AddNewTask saveNewTask={this.saveNewTask}/>               
             </div>
         );
@@ -320,6 +296,19 @@ var TaskMan = React.createClass({
 
 
 var Modal_AddNewTask = React.createClass({
+    getInitialState: function () {
+        return ({color: "rgb(234, 215, 245)"});
+    },
+    componentDidMount: function () {
+        $('.datepicker').datepicker({
+            autoclose: true
+        });
+    },
+    generateRandomColor: function () {
+        var taskColor = "rgb(" + Math.floor(Math.random()*155 + 100) + ', ' +      Math.floor(Math.random()*155 + 100) + ', ' + Math.floor(Math.random()*155 + 100) + ')';
+        
+        this.setState({color: taskColor});
+    },
     render: function () {
         return (
             <div className="modal fade" tabIndex="-1" id="modal_AddNewTask">
@@ -334,13 +323,13 @@ var Modal_AddNewTask = React.createClass({
                         <section className="clearfix">
                             <label className="col-xs-90">Name</label>
                             <div className="col-xs-250 col-xs-offset-20">
-                                <input type="text" className="form-control" id="taskName"/>
+                                <input type="text" className="form-control field" id="taskName" placeholder="Enter a name for this task..."/>
                             </div>
                         </section>
                         <section className="clearfix marginTop15">
                             <label className="col-xs-90">Start Date</label>
                             <div className="col-xs-250 col-xs-offset-20">
-                                <input type="text" className="form-control" id="taskStartDate"/>
+                                <input type="text" className="form-control field datepicker" id="taskStartDate"/>
                             </div>
                         </section>
                     </div>
@@ -348,21 +337,25 @@ var Modal_AddNewTask = React.createClass({
                         <section className="clearfix">
                             <label className="col-xs-90 col-xs-offset-20">Owner</label>
                             <div className="col-xs-250">
-                                <input type="text" className="form-control" id="taskOwner"/>
+                                <input type="text" className="form-control field" id="taskOwner"/>
                             </div>
                         </section>
                         <section className="clearfix marginTop15">
                             <label className="col-xs-90 col-xs-offset-20">End Date</label>
                             <div className="col-xs-250">
-                                <input type="text" className="form-control" id="taskEndDate"/>
+                                <input type="text" className="form-control field datepicker" id="taskEndDate"/>
                             </div>
                         </section>
                     </div>
                     <div className="col-xs-360 clearfix marginTop15">
                         <label className="col-xs-56">Description</label>
                         <div className="col-xs-304">
-                            <textarea className="form-control" id="taskDesc"/>
+                            <textarea className="form-control field" id="taskDesc"/>
                         </div>
+                    </div>
+            
+                    <div className="col-xs-360 clearfix marginTop15 form-control text-center" style={{background: this.state.color}} onClick={this.generateRandomColor} id="bgColor">
+                        Click here to generate a random color for this task
                     </div>
                     <div className="clearfix"></div>
                   </div>
