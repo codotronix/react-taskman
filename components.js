@@ -50,51 +50,26 @@ var TimeHeader = React.createClass({
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /****************************************************************************************
 ************************ Component:  Task ***********************************************
 ****************************************************************************************/
 var Task = React.createClass({
-    getCellClass: function () {
-        var duration = this.props.task.end - this.props.task.start;
-        var classes = "taskCell col-xs-offset-" + this.props.task.start + " col-xs-" + duration;
+    getCellClass: function () {        
+        var classes = 'taskCell col-xs-offset-' + this.props.task.offset + ' col-xs-100';
         return classes;
     },
     render: function () {
         return (
             <div className="row taskRow">
                 <div className={this.getCellClass()} style={{background: this.props.task.bgColor}}>
-                    {this.props.task.name}
+                    <b>{this.props.task.name}</b><br/>
+                    [ {this.props.task.startDate} - {this.props.task.endDate} ]
                 </div>                
             </div>
         );
     }
 });
 /////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -114,7 +89,7 @@ var TaskContainer = React.createClass({
     },
     removeUnelligibleTasks: function (tasks) {
         var elligibleTasks = [];
-        var timeInfo = this.props.timeInfo; console.log(timeInfo);
+        var timeInfo = this.props.timeInfo;
         for (var i in tasks) {
             if ((new Date(tasks[i].endDate)) < timeInfo.startDate || (new Date(tasks[i].startDate)) > timeInfo.endDate) {
                 //This task is not eliigible to be shown in current timescope
@@ -125,9 +100,50 @@ var TaskContainer = React.createClass({
         console.log('elligibleTasks=');console.log(elligibleTasks)
         return elligibleTasks;
     },
+    calculateOffsets: function (tasks) {
+        var timeInfo = this.props.timeInfo;
+        
+        for (var i in tasks) {
+            if  (tasks[i].startDate <= timeInfo.startDate) {
+                tasks[i].offset = 0;
+            } else {
+                var taskStM = tasks[i].startDate.split('/')[1];
+                var taskStD = tasks[i].startDate.split('/')[2];
+                                                            
+                if (timeInfo.viewScope == 'y') {
+                    tasks[i].offset = Math.floor((taskStM-1) * 30 + taskStD * (360/365));
+                } 
+                else if (timeInfo.viewScope == 'q') {
+                    var qStartMonth = (timeInfo.quarter - 1)*3 + 1;                    
+                    tasks[i].offset = Math.floor((taskStM - qStartMonth) * 120 + (taskStD * (360/365) * 4));
+                } 
+                else if (timeInfo.viewScope == 'm') {
+                    tasks[i].offset = Math.floor(taskStD * (360/365) * 12);
+                }                                        
+            }
+        }
+        
+        return (tasks);
+    },
+    calculateDuration: function (tasks) {
+        var timeInfo = this.props.timeInfo;
+        
+        for (var i in tasks) {
+            if (tasks[i].endDate > timeInfo.endDate) {
+                tasks[i].duration = 360 - tasks[i].offset;
+            }
+            else {
+                var taskStM = tasks[i].startDate.split('/')[1];
+                var taskStD = tasks[i].startDate.split('/')[2];
+            
+            }
+        }
+        
+    },
     render: function () {
         //var that = this;
         var tasks = this.removeUnelligibleTasks(this.state.taskData);
+        tasks = this.calculateOffsets(tasks);
         return (
             <div className="col-xs-360">                
                 {tasks.map(function(task){
