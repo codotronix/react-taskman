@@ -309,6 +309,12 @@ var TaskMan = React.createClass({
             }
         });
         
+        if((new Date(newTask.endDate)) <= (new Date(newTask.startDate))) {
+            console.log('Start Date must be atleast 1 day greater than End Date...');
+            taskCreationSuccessful = false;
+            return;
+        }
+        
         if (taskCreationSuccessful) {
             newTask.bgColor = $('#bgColor').css('background-color');
             newTask.id = (new Date()).getTime() * Math.random();
