@@ -176,13 +176,6 @@ var ToolsGroup = React.createClass({
 
 
 
-
-
-
-
-
-
-
 /****************************************************************************************
 * Component: TaskMan                
 *
@@ -414,11 +407,6 @@ var Modal_AddNewTask = React.createClass({
         );
     }
 });
-
-
-
-
-
 
  
 //ReactDOM.render(<TaskInnerContainer taskData={taskData}/>, document.getElementById('taskContainer'));
