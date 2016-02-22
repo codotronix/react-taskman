@@ -55,7 +55,7 @@ var TimeHeader = React.createClass({
 ****************************************************************************************/
 var Task = React.createClass({
     getCellClass: function () {        
-        var classes = 'taskCell col-xs-offset-' + this.props.task.offset + ' col-xs-100';
+        var classes = 'taskCell col-xs-offset-' + this.props.task.startOffset + ' col-xs-' + (this.props.task.endOffset - this.props.task.startOffset);
         return classes;
     },
     render: function () {
@@ -100,50 +100,35 @@ var TaskContainer = React.createClass({
         console.log('elligibleTasks=');console.log(elligibleTasks)
         return elligibleTasks;
     },
-    calculateOffsets: function (tasks) {
+    getOffsetForDate: function(date){
         var timeInfo = this.props.timeInfo;
-        
-        for (var i in tasks) {
-            if  (tasks[i].startDate <= timeInfo.startDate) {
-                tasks[i].offset = 0;
-            } else {
-                var taskStM = tasks[i].startDate.split('/')[1];
-                var taskStD = tasks[i].startDate.split('/')[2];
-                                                            
-                if (timeInfo.viewScope == 'y') {
-                    tasks[i].offset = Math.floor((taskStM-1) * 30 + taskStD * (360/365));
-                } 
-                else if (timeInfo.viewScope == 'q') {
-                    var qStartMonth = (timeInfo.quarter - 1)*3 + 1;                    
-                    tasks[i].offset = Math.floor((taskStM - qStartMonth) * 120 + (taskStD * (360/365) * 4));
-                } 
-                else if (timeInfo.viewScope == 'm') {
-                    tasks[i].offset = Math.floor(taskStD * (360/365) * 12);
-                }                                        
-            }
-        }
-        
-        return (tasks);
-    },
-    calculateDuration: function (tasks) {
-        var timeInfo = this.props.timeInfo;
-        
-        for (var i in tasks) {
-            if (tasks[i].endDate > timeInfo.endDate) {
-                tasks[i].duration = 360 - tasks[i].offset;
-            }
-            else {
-                var taskStM = tasks[i].startDate.split('/')[1];
-                var taskStD = tasks[i].startDate.split('/')[2];
-            
-            }
-        }
-        
+        var offset = 0;
+        if (date <= timeInfo.startDate) {
+            offset = 0;
+        } else {
+            var month = date.split('/')[1];
+            var day = date.split('/')[2];
+
+            if (timeInfo.viewScope == 'y') {
+                offset = Math.floor((month-1) * 30 + day * (360/365));
+            } 
+            else if (timeInfo.viewScope == 'q') {
+                var qStartMonth = (timeInfo.quarter - 1)*3 + 1;                    
+                offset = Math.floor((month - qStartMonth) * 120 + (day * (360/365) * 4));
+            } 
+            else if (timeInfo.viewScope == 'm') {
+                offset = Math.floor(day * (360/365) * 12);
+            }                                        
+        }        
+        return offset;
     },
     render: function () {
         //var that = this;
-        var tasks = this.removeUnelligibleTasks(this.state.taskData);
-        tasks = this.calculateOffsets(tasks);
+        var tasks = this.removeUnelligibleTasks(this.state.taskData);        
+        for (var i in tasks) {
+            tasks[i].startOffset = this.getOffsetForDate(tasks[i].startDate);
+            tasks[i].endOffset = this.getOffsetForDate(tasks[i].endDate);
+        }        
         return (
             <div className="col-xs-360">                
                 {tasks.map(function(task){
