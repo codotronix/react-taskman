@@ -111,19 +111,30 @@ var TaskContainer = React.createClass({
             that.setState({taskData: tasks});
         });
         return ({taskData: []});
-    },    
+    },
+    removeUnelligibleTasks: function (tasks) {
+        var elligibleTasks = [];
+        var timeInfo = this.props.timeInfo; console.log(timeInfo);
+        for (var i in tasks) {
+            if ((new Date(tasks[i].endDate)) < timeInfo.startDate || (new Date(tasks[i].startDate)) > timeInfo.endDate) {
+                //This task is not eliigible to be shown in current timescope
+            } else {
+                 elligibleTasks.push(tasks[i]);                     
+            }
+        }
+        console.log('elligibleTasks=');console.log(elligibleTasks)
+        return elligibleTasks;
+    },
     render: function () {
-        var that = this;
+        //var that = this;
+        var tasks = this.removeUnelligibleTasks(this.state.taskData);
         return (
             <div className="col-xs-360">                
-                {this.state.taskData.map(function(task){
+                {tasks.map(function(task){
                     return (
                         <Task task={task} key={task.id}/>
                     );
-                })}
-                <div className="text-center">
-                    <button onClick={this.addNewTask} id="btnLoadMoreTasks" className="btn btn-primary marginTop15">Load More Tasks</button>
-                </div>
+                })}                
             </div>
         );
     }
@@ -190,21 +201,50 @@ var ToolsGroup = React.createClass({
 ****************************************************************************************/
 var TaskMan = React.createClass({
     getInitialState: function () {
-        var timeInfo = {
-            viewScope: "y",
-            year: 2016,
-            quarter: 1,
-            month: 2
-        };
+        var timeInfo = {};
+        timeInfo.viewScope = "y";
+        timeInfo.year = (new Date()).getFullYear();
+        timeInfo.quarter = 1;
+        timeInfo.month = 2;
+        timeInfo.startDate = new Date(timeInfo.year + '/1/1');
+        timeInfo.endDate = new Date(timeInfo.year + '/12/31');
+        
+        //console.log(timeInfo);
         
         var myDB = new Firebase('https://codotronix-taskman.firebaseio.com/reactTasks/');
         
         return ({timeInfo: timeInfo, myDB: myDB});
     },
+    updateCurrentStartEndDate: function (timeInfo) {
+        if (timeInfo.viewScope == "y") {
+            timeInfo.startDate = new Date(timeInfo.year + '/1/1');
+            timeInfo.endDate   = new Date(timeInfo.year + '/12/31');
+        } else if (timeInfo.viewScope == "q") {
+            var qStart = ['useless 0th location', '/01/01', '/04/01', '/07/01', '/10/01'];
+            var qEnd = ['useless 0th location', '/03/31', '/06/30', '/09/30', '/12/31'];
+            
+            timeInfo.startDate = new Date(timeInfo.year + qStart[timeInfo.quarter]);
+            timeInfo.endDate   = new Date(timeInfo.year + qEnd[timeInfo.quarter]);            
+        } else if (timeInfo.viewScope == "m") {
+            var daysInMonth = ['useless 0th location',31,28,31,30,31,30,31,31,30,31,30,31];
+            
+            //Feb 29 for Leap Year
+            if((timeInfo.year%400 == 0) || ((timeInfo.year%100 != 0) && (timeInfo.year%4 == 0))) {
+                daysInMonth = ['useless 0th location',31,29,31,30,31,30,31,31,30,31,30,31];
+            }
+            
+            timeInfo.startDate = new Date(timeInfo.year + '/' + timeInfo.month + '/1');
+            timeInfo.endDate   = new Date(timeInfo.year + '/' + timeInfo.month + '/' + daysInMonth[timeInfo.month]);
+        }
+        
+        console.log(timeInfo);
+        return (timeInfo);
+    },
     viewChanged: function (viewScope) {
         var timeInfo = this.state.timeInfo;
         timeInfo.viewScope = viewScope;
-        console.log('setting the TaskMan state timeInfo='); console.log(timeInfo);
+        //console.log('setting the TaskMan state timeInfo='); console.log(timeInfo);
+        timeInfo = this.updateCurrentStartEndDate(timeInfo);
         this.setState({timeInfo: timeInfo});
     },
     viewPrev: function () {
@@ -227,7 +267,7 @@ var TaskMan = React.createClass({
                 timeInfo.month--;
             }
         }
-        
+        timeInfo = this.updateCurrentStartEndDate(timeInfo);
         this.setState({timeInfo: timeInfo});
     },
     viewNext: function () {
@@ -250,7 +290,7 @@ var TaskMan = React.createClass({
                 timeInfo.month++;
             }
         }
-        
+        timeInfo = this.updateCurrentStartEndDate(timeInfo);
         this.setState({timeInfo: timeInfo});
     },
     saveNewTask: function (e) {
@@ -282,7 +322,7 @@ var TaskMan = React.createClass({
                 <ToolsGroup viewChanged={this.viewChanged} />
                 <TimeHeader timeInfo={this.state.timeInfo} viewPrev={this.viewPrev} viewNext={this.viewNext} />
                 <TaskContainer myDB={this.state.myDB} timeInfo={this.state.timeInfo}/>
-                <Modal_AddNewTask saveNewTask={this.saveNewTask}/>               
+                <Modal_AddNewTask saveNewTask={this.saveNewTask}/>             
             </div>
         );
     }
