@@ -79,7 +79,7 @@ var Task = React.createClass({
 /****************************************************************************************
 ***************** Component:  TaskContainer *********************************************
 ****************************************************************************************/
-var TaskContainer = React.createClass({
+var TaskContainer = React.createClass({    
     getInitialState: function () {
         var that = this;        
         this.props.myDB.on('child_added', function(snapshot) {            
@@ -103,38 +103,52 @@ var TaskContainer = React.createClass({
         //console.log('elligibleTasks=');console.log(elligibleTasks)
         return elligibleTasks;
     },
-    getOffsetForDate: function(date){
+    getOffsetForDate: function(date, isStartDate){
         var timeInfo = this.props.timeInfo;
         var offset = 0;
-        if ((new Date(date)) <= (new Date(timeInfo.startDate))) {
+        date = new Date(date);        
+        if (isStartDate) {
+            date.setDate(date.getDate()-1);
+        }
+        
+        if (date < (new Date(timeInfo.startDate))) {
             offset = 0;
-        } else if ((new Date(date)) >= (new Date(timeInfo.endDate))) {
+        } else if (date > (new Date(timeInfo.endDate))) {
             offset = 360;
         }
         else {
-            var month = date.split('/')[1];
-            var day = date.split('/')[2];
-
-            if (timeInfo.viewScope == 'y') {
+            //var month = parseInt(date.split('/')[1]);
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+            //var day = parseInt(date.split('/')[2]);
+            //day = isStartDate ? (day-1): day;
+            
+            var daysInMonth = ['useless 0th location',31,28,31,30,31,30,31,31,30,31,30,31];            
+            //Feb 29 for Leap Year
+            if ((timeInfo.year%400 == 0) || ((timeInfo.year%100 != 0) && (timeInfo.year%4 == 0))) {
+                daysInMonth = ['useless 0th location',31,29,31,30,31,30,31,31,30,31,30,31];
+            }
+            
+            if (timeInfo.viewScope == 'y') {                
                 offset = Math.floor((month-1) * 30 + day * (360/365));
             } 
             else if (timeInfo.viewScope == 'q') {
                 var qStartMonth = (timeInfo.quarter - 1)*3 + 1;                    
-                offset = Math.floor((month - qStartMonth) * 120 + (day * (360/365) * 4));
+                offset = Math.floor((month - qStartMonth) * 120 + day / daysInMonth[month] * 120);
             } 
             else if (timeInfo.viewScope == 'm') {
-                offset = Math.floor(day * (360/365) * 12);
+                offset = Math.floor(day/(daysInMonth[month]) * 360);
             }                                        
         }
         
-        //console.log('dat='+date+' ... offset='+offset);
+        console.log('dat='+date+' ... offset='+offset);
         return offset;
     },
     render: function () {
         //var that = this;
         var tasks = this.removeUnelligibleTasks(this.state.taskData);        
         for (var i in tasks) {
-            tasks[i].startOffset = this.getOffsetForDate(tasks[i].startDate);
+            tasks[i].startOffset = this.getOffsetForDate(tasks[i].startDate, true);
             tasks[i].endOffset = this.getOffsetForDate(tasks[i].endDate);
         }        
         return (
@@ -231,7 +245,7 @@ var TaskMan = React.createClass({
             var daysInMonth = ['useless 0th location',31,28,31,30,31,30,31,31,30,31,30,31];
             
             //Feb 29 for Leap Year
-            if((timeInfo.year%400 == 0) || ((timeInfo.year%100 != 0) && (timeInfo.year%4 == 0))) {
+            if ((timeInfo.year%400 == 0) || ((timeInfo.year%100 != 0) && (timeInfo.year%4 == 0))) {
                 daysInMonth = ['useless 0th location',31,29,31,30,31,30,31,31,30,31,30,31];
             }
             
