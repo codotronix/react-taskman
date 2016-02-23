@@ -54,7 +54,7 @@ var TimeHeader = React.createClass({
 ************************ Component:  Task ***********************************************
 ****************************************************************************************/
 var Task = React.createClass({
-    getCellClass: function () {        
+    getCellClass: function () {
         var offset = this.props.task.startOffset;
         var duration = (this.props.task.endOffset - this.props.task.startOffset);
         duration = (offset + duration > 360) ? (360-offset) : duration;
@@ -100,15 +100,18 @@ var TaskContainer = React.createClass({
                  elligibleTasks.push(tasks[i]);                     
             }
         }
-        console.log('elligibleTasks=');console.log(elligibleTasks)
+        //console.log('elligibleTasks=');console.log(elligibleTasks)
         return elligibleTasks;
     },
     getOffsetForDate: function(date){
         var timeInfo = this.props.timeInfo;
         var offset = 0;
-        if (date <= timeInfo.startDate) {
+        if ((new Date(date)) <= (new Date(timeInfo.startDate))) {
             offset = 0;
-        } else {
+        } else if ((new Date(date)) >= (new Date(timeInfo.endDate))) {
+            offset = 360;
+        }
+        else {
             var month = date.split('/')[1];
             var day = date.split('/')[2];
 
@@ -122,7 +125,9 @@ var TaskContainer = React.createClass({
             else if (timeInfo.viewScope == 'm') {
                 offset = Math.floor(day * (360/365) * 12);
             }                                        
-        }        
+        }
+        
+        //console.log('dat='+date+' ... offset='+offset);
         return offset;
     },
     render: function () {
