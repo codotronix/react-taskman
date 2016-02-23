@@ -55,7 +55,10 @@ var TimeHeader = React.createClass({
 ****************************************************************************************/
 var Task = React.createClass({
     getCellClass: function () {        
-        var classes = 'taskCell col-xs-offset-' + this.props.task.startOffset + ' col-xs-' + (this.props.task.endOffset - this.props.task.startOffset);
+        var offset = this.props.task.startOffset;
+        var duration = (this.props.task.endOffset - this.props.task.startOffset);
+        duration = (offset + duration > 360) ? (360-offset) : duration;
+        var classes = 'taskCell col-xs-offset-' + offset + ' col-xs-' + duration;
         return classes;
     },
     render: function () {
