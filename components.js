@@ -179,10 +179,10 @@ var ToolsGroup = React.createClass({
     render: function () {        
         return (
             <div className="col-xs-360 toolsGroup">
-                <div className="col-xs-20">
+                <div className="col-xs-60">
                     <i className="fa fa-plus" title="Add New Task" onClick={this.showAddNewTaskModal}></i>
                 </div>
-                <div className="col-xs-30">
+                <div className="col-xs-130">
                     <select className="form-control" onChange={this.viewStateChanged}>
                         <option value="y">Year</option>
                         <option value="q">Quarter</option>
