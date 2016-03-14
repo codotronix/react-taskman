@@ -61,10 +61,14 @@ var Task = React.createClass({
         var classes = 'taskCell col-xs-offset-' + offset + ' col-xs-' + duration;
         return classes;
     },
+    showTaskDetails: function () {
+        this.props.showTaskDetails(this.props.task);
+        //console.log(this.props.task);
+    },
     render: function () {
         return (
             <div className="row taskRow">
-                <div className={this.getCellClass()} style={{background: this.props.task.bgColor}}>
+                <div className={this.getCellClass()} style={{background: this.props.task.bgColor}} onClick={this.showTaskDetails}>
                     <b>{this.props.task.name}</b><br/>
                     [ {this.props.task.startDate} - {this.props.task.endDate} ]
                 </div>                
@@ -141,21 +145,22 @@ var TaskContainer = React.createClass({
             }                                        
         }
         
-        console.log('dat='+date+' ... offset='+offset);
+        //console.log('dat='+date+' ... offset='+offset);
         return offset;
-    },
+    },   
     render: function () {
         //var that = this;
         var tasks = this.removeUnelligibleTasks(this.state.taskData);        
         for (var i in tasks) {
             tasks[i].startOffset = this.getOffsetForDate(tasks[i].startDate, true);
             tasks[i].endOffset = this.getOffsetForDate(tasks[i].endDate);
-        }        
-        return (
+        }
+        var showTaskDetails = this.props.showTaskDetails;
+        return (            
             <div className="col-xs-360">                
                 {tasks.map(function(task){
                     return (
-                        <Task task={task} key={task.id}/>
+                        <Task task={task} key={task.id} showTaskDetails={showTaskDetails}/>
                     );
                 })}                
             </div>
@@ -174,15 +179,15 @@ var ToolsGroup = React.createClass({
         this.props.viewChanged(e.target.value);
     },    
     showAddNewTaskModal: function () {
-        $('#modal_AddNewTask').modal('show');
+        $('#modal_AddNewTask').modal('show');        
     },
     render: function () {        
         return (
             <div className="col-xs-360 toolsGroup">
-                <div className="col-xs-60">
+                <div className="col-xs-60 col-sm-40 col-md-20">
                     <i className="fa fa-plus" title="Add New Task" onClick={this.showAddNewTaskModal}></i>
                 </div>
-                <div className="col-xs-130">
+                <div className="col-xs-120 col-sm-50 col-md-30">
                     <select className="form-control" onChange={this.viewStateChanged}>
                         <option value="y">Year</option>
                         <option value="q">Quarter</option>
@@ -229,7 +234,7 @@ var TaskMan = React.createClass({
         
         var myDB = new Firebase('https://codotronix-taskman.firebaseio.com/reactTasks/');
         
-        return ({timeInfo: timeInfo, myDB: myDB});
+        return ({timeInfo: timeInfo, myDB: myDB, taskToShow: {}});
     },
     updateCurrentStartEndDate: function (timeInfo) {
         if (timeInfo.viewScope == "y") {
@@ -253,7 +258,7 @@ var TaskMan = React.createClass({
             timeInfo.endDate   = new Date(timeInfo.year + '/' + timeInfo.month + '/' + daysInMonth[timeInfo.month]);
         }
         
-        console.log(timeInfo);
+        //console.log(timeInfo);
         return (timeInfo);
     },
     viewChanged: function (viewScope) {
@@ -338,13 +343,20 @@ var TaskMan = React.createClass({
         
         $('#modal_AddNewTask').modal('hide');
     },
+    showTaskDetails: function (task) {
+        this.setState({taskToShow: task});
+        //console.log(task);
+        //console.log('task clicked');
+        $('#modal_ShowDetails').modal('show');
+    },
     render: function () {
         return (
             <div>
                 <ToolsGroup viewChanged={this.viewChanged} />
                 <TimeHeader timeInfo={this.state.timeInfo} viewPrev={this.viewPrev} viewNext={this.viewNext} />
-                <TaskContainer myDB={this.state.myDB} timeInfo={this.state.timeInfo}/>
-                <Modal_AddNewTask saveNewTask={this.saveNewTask}/>             
+                <TaskContainer myDB={this.state.myDB} timeInfo={this.state.timeInfo} showTaskDetails={this.showTaskDetails}/>
+                <Modal_AddNewTask saveNewTask={this.saveNewTask}/>
+                <Modal_ShowDetails taskToShow={this.state.taskToShow}/>  
             </div>
         );
     }
@@ -352,7 +364,9 @@ var TaskMan = React.createClass({
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-
+/****************************************************************************************
+*************************** Popup to Add New Task ***************************************
+****************************************************************************************/
 
 var Modal_AddNewTask = React.createClass({
     getInitialState: function () {
@@ -430,7 +444,64 @@ var Modal_AddNewTask = React.createClass({
     }
 });
 
- 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/****************************************************************************************
+*************************** Popup to Show Details of a Task  ****************************
+****************************************************************************************/
+
+var Modal_ShowDetails = React.createClass({
+    render: function () {
+        //console.log(this.props.showTaskDetails);
+        //console.log(this.props.taskToShow);
+        return (
+            <div className="modal fade" tabIndex="-1" id="modal_ShowDetails">
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header" style={{background: this.props.taskToShow.bgColor}}>
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 className="modal-title">Task Details</h4>
+                  </div>
+                  <div className="modal-body">
+                    <div className="col-xs-360 col-sm-180">
+                        <section className="clearfix">
+                            <label className="col-xs-100">Name</label>
+                            <label className="col-xs-260">{this.props.taskToShow.name}</label>
+                        </section>
+                        <section className="clearfix marginTop15">
+                            <label className="col-xs-100">Owner</label>
+                            <label className="col-xs-260">{this.props.taskToShow.owner}</label>
+                        </section>                        
+                    </div>
+                    <div className="col-xs-360 col-sm-180">
+                        <section className="clearfix">
+                            <label className="col-xs-100">Start Date</label>
+                            <label className="col-xs-260">{this.props.taskToShow.startDate}</label>
+                        </section>
+                        <section className="clearfix marginTop15">
+                            <label className="col-xs-100">End Date</label>
+                            <label className="col-xs-260">{this.props.taskToShow.endDate}</label>
+                        </section>
+                    </div>
+                    <div className="col-xs-360 clearfix marginTop15">
+                        <label className="col-xs-60">Description</label>
+                        <label className="col-xs-300">{this.props.taskToShow.desc}</label>
+                    </div>  
+                    <div className="clearfix"></div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-default" data-dismiss="modal">OK</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        );
+    }
+});
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 //ReactDOM.render(<TaskInnerContainer taskData={taskData}/>, document.getElementById('taskContainer'));
 ReactDOM.render(
     <TaskMan />, 
